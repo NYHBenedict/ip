@@ -28,7 +28,7 @@ public class BenBot {
             return "T"; // base/unknown
         }
 
-        public String DisplayString() {
+        public String displayString() {
             return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;
         }
     }
@@ -58,7 +58,7 @@ public class BenBot {
         }
 
         @Override
-        public String DisplayString() {
+        public String displayString() {
             return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
                     + description + " (by: " + by + ")";
         }
@@ -80,22 +80,44 @@ public class BenBot {
         }
 
         @Override
-        public String DisplayString() {
+        public String displayString() {
             return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
                     + description + " (from: " + from + " to: " + to + ")";
+        }
+    }
+
+    public static class BenBotException extends Exception {
+        public BenBotException(String message) {
+            super(message);
         }
     }
 
     private static void printAddMessage(Task task, int count) {
         printLine();
         System.out.println(" Got it. I've added this task:");
-        System.out.println(" " + task.DisplayString());
+        System.out.println(" " + task.displayString());
         System.out.println(" Now you have " + count + " tasks in the list.");
         printLine();
     }
 
-    private static int parseTaskNumber(String s) {
-        return Integer.parseInt(s.trim());
+    private static int parseIndex(String input, String cmd, int taskCount) throws BenBotException {
+        String rest = input.substring(cmd.length()).trim();
+        if (rest.isEmpty()) {
+            throw new BenBotException("Please specify a task number. Example: " + cmd + " 2");
+        }
+
+        int number;
+        try {
+            number = Integer.parseInt(rest);
+        } catch (NumberFormatException e) {
+            throw new BenBotException("Task number must be a number. Example: " + cmd + " 2");
+        }
+
+        int idx = number - 1;
+        if (idx < 0 || idx >= taskCount) {
+            throw new BenBotException("Task number out of range. Use list to see valid numbers.");
+        }
+        return idx;
     }
 
     private static void printGreeting() {
@@ -122,89 +144,110 @@ public class BenBot {
         while (sc.hasNextLine()) {
             String input = sc.nextLine().trim();
 
-            if (input.equals("bye")) {
-                printLine();
-                System.out.println(" Cya soon! :)");
-                printLine();
-                break;
-            }
+            try {
+                if (input.equals("bye")) {
+                    printLine();
+                    System.out.println(" Bye. Hope to see you again soon!");
+                    printLine();
+                    break;
+                }
 
-            if (input.equals("list")) {
-                printLine();
-                if (taskCount == 0) {
-                    System.out.println("no tasks yet!");
-                } else {
+                if (input.equals("list")) {
+                    printLine();
+                    System.out.println(" Here are the tasks in your list:");
                     for (int i = 0; i < taskCount; i++) {
-                        System.out.println(" " + (i + 1) + ". " + tasks[i].DisplayString());
+                        System.out.println(" " + (i + 1) + "." + tasks[i].displayString());
                     }
-                }
-                printLine();
-                continue;
-            }
-
-            if (input.startsWith("mark ")) {
-                int index = parseTaskNumber(input.substring(5)) - 1;
-                if (index >= 0 && index < taskCount) {
-                    tasks[index].markDone();
-                    System.out.println(" Awesome! I've marked this as done: ");
-                    System.out.println(" " + tasks[index].DisplayString());
                     printLine();
+                    continue;
                 }
-                continue;
-            }
 
-            if (input.startsWith("unmark ")) {
-                int index = parseTaskNumber(input.substring(7)) - 1;
-                if (index >= 0 && index < taskCount) {
-                    tasks[index].markNotDone();
-                    System.out.println(" Alroght! I've marked this as not done yet: ");
-                    System.out.println(" " + tasks[index].DisplayString());
+                if (input.startsWith("mark")) {
+                    int idx = parseIndex(input, "mark", taskCount);
+                    tasks[idx].markDone();
                     printLine();
+                    System.out.println(" Nice! I've marked this task as done:");
+                    System.out.println(" " + tasks[idx].displayString());
+                    printLine();
+                    continue;
                 }
-                continue;
-            }
 
-            if (input.startsWith("todo ")) {
-                String desc = input.substring(5).trim();
-                tasks[taskCount++] = new Todo(desc);
-                printAddMessage(tasks[taskCount - 1], taskCount);
-                continue;
-            }
+                if (input.startsWith("unmark")) {
+                    int idx = parseIndex(input, "unmark", taskCount);
+                    tasks[idx].markNotDone();
+                    printLine();
+                    System.out.println(" OK, I've marked this task as not done yet:");
+                    System.out.println(" " + tasks[idx].displayString());
+                    printLine();
+                    continue;
+                }
 
-            if (input.startsWith("deadline ")) {
-                String rest = input.substring(9).trim();
-                String[] parts = rest.split(" /by ", 2);
-                String desc = parts[0].trim();
-                String by = (parts.length == 2) ? parts[1].trim() : "";
-                tasks[taskCount++] = new Deadline(desc, by);
-                printAddMessage(tasks[taskCount - 1], taskCount);
-                continue;
-            }
+                if (input.startsWith("todo")) {
+                    String desc = input.length() > 4 ? input.substring(4).trim() : "";
+                    if (desc.isEmpty()) {
+                        throw new BenBotException("Todo description cannot be empty. Try: todo read book");
+                    }
+                    tasks[taskCount++] = new Todo(desc);
+                    printAddMessage(tasks[taskCount - 1], taskCount);
+                    continue;
+                }
 
-            if (input.startsWith("event ")) {
-                String rest = input.substring(6).trim();
+                if (input.startsWith("deadline")) {
+                    String rest = input.length() > 8 ? input.substring(8).trim() : "";
+                    if (rest.isEmpty()) {
+                        throw new BenBotException("Deadline description cannot be empty. Try: deadline return book" +
+                                " /by Sunday");
+                    }
+                    String[] parts = rest.split(" /by ", 2);
+                    if (parts.length < 2 || parts[1].trim().isEmpty()) {
+                        throw new BenBotException("Deadline needs a /by part. Example: deadline return book" +
+                                " /by Sunday");
+                    }
+                    tasks[taskCount++] = new Deadline(parts[0].trim(), parts[1].trim());
+                    printAddMessage(tasks[taskCount - 1], taskCount);
+                    continue;
+                }
 
-                String[] fromSplit = rest.split(" /from ", 2);
-                String desc = fromSplit[0].trim();
+                if (input.startsWith("event")) {
+                    String rest = input.length() > 5 ? input.substring(5).trim() : "";
+                    if (rest.isEmpty()) {
+                        throw new BenBotException("Event description cannot be empty. Try: event meeting" +
+                                " /from 2pm /to 4pm");
+                    }
 
-                String from = "";
-                String to = "";
+                    String[] fromSplit = rest.split(" /from ", 2);
+                    if (fromSplit.length < 2 || fromSplit[1].trim().isEmpty()) {
+                        throw new BenBotException("Event needs a /from part. Example: event meeting /from 2pm /to 4pm");
+                    }
 
-                if (fromSplit.length == 2) {
+                    String desc = fromSplit[0].trim();
                     String[] toSplit = fromSplit[1].split(" /to ", 2);
-                    from = toSplit[0].trim();
-                    if (toSplit.length == 2) {
-                        to = toSplit[1].trim();
+                    if (toSplit.length < 2 || toSplit[1].trim().isEmpty()) {
+                        throw new BenBotException("Event needs a /to part. Example: event meeting /from 2pm /to 4pm");
                     }
+
+                    String from = toSplit[0].trim();
+                    String to = toSplit[1].trim();
+
+                    tasks[taskCount++] = new Event(desc, from, to);
+                    printAddMessage(tasks[taskCount - 1], taskCount);
+                    continue;
                 }
 
-                tasks[taskCount++] = new Event(desc, from, to);
-                printAddMessage(tasks[taskCount - 1], taskCount);
-                continue;
-            }
+                // Unknown command (matches your "blah" example)
+                throw new BenBotException("I don't understand that command. Try: todo / deadline /" +
+                        " event / list / mark / unmark / bye");
 
-            tasks[taskCount++] = new Todo(input);
-            printAddMessage(tasks[taskCount - 1], taskCount);
+            } catch (BenBotException e) {
+                printLine();
+                System.out.println(" " + e.getMessage());
+                printLine();
+            } catch (Exception e) {
+                // Safety net: prevents program crash (optional but nice)
+                printLine();
+                System.out.println(" Something went wrong. Please try again.");
+                printLine();
+            }
 
         }
 
