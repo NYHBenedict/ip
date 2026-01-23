@@ -4,8 +4,8 @@ public class BenBot {
     private static final String LINE = "____________________________________________________________";
 
     public static class Task {
-        private final String description;
-        private boolean isDone;
+        protected final String description;
+        protected boolean isDone;
 
         public Task(String description) {
             this.description = description;
@@ -20,9 +20,78 @@ public class BenBot {
             isDone = false;
         }
 
-        public String DisplayString() {
-            return "[" + (isDone ? "X" : " ") + "] " + description;
+        protected String getStatusIcon() {
+            return isDone ? "X" : " ";
         }
+
+        protected String getTypeIcon() {
+            return "T"; // base/unknown
+        }
+
+        public String DisplayString() {
+            return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;
+        }
+    }
+
+    public static class Todo extends Task {
+        public Todo(String description) {
+            super(description);
+        }
+
+        @Override
+        protected String getTypeIcon() {
+            return "T";
+        }
+    }
+
+    public static class Deadline extends Task {
+        private final String by;
+
+        public Deadline(String description, String by) {
+            super(description);
+            this.by = by;
+        }
+
+        @Override
+        protected String getTypeIcon() {
+            return "D";
+        }
+
+        @Override
+        public String DisplayString() {
+            return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
+                    + description + " (by: " + by + ")";
+        }
+    }
+
+    public static class Event extends Task {
+        private final String from;
+        private final String to;
+
+        public Event(String description, String from, String to) {
+            super(description);
+            this.from = from;
+            this.to = to;
+        }
+
+        @Override
+        protected String getTypeIcon() {
+            return "E";
+        }
+
+        @Override
+        public String DisplayString() {
+            return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
+                    + description + " (from: " + from + " to: " + to + ")";
+        }
+    }
+
+    private static void printAddMessage(Task task, int count) {
+        printLine();
+        System.out.println(" Got it. I've added this task:");
+        System.out.println(" " + task.DisplayString());
+        System.out.println(" Now you have " + count + " tasks in the list.");
+        printLine();
     }
 
     private static int parseTaskNumber(String s) {
@@ -95,11 +164,48 @@ public class BenBot {
                 continue;
             }
 
-            tasks[taskCount] = new Task(input);
-            taskCount++;
-            printLine();
-            System.out.println(" added: " + input);
-            printLine();
+            if (input.startsWith("todo ")) {
+                String desc = input.substring(5).trim();
+                tasks[taskCount++] = new Todo(desc);
+                printAddMessage(tasks[taskCount - 1], taskCount);
+                continue;
+            }
+
+            if (input.startsWith("deadline ")) {
+                String rest = input.substring(9).trim();
+                String[] parts = rest.split(" /by ", 2);
+                String desc = parts[0].trim();
+                String by = (parts.length == 2) ? parts[1].trim() : "";
+                tasks[taskCount++] = new Deadline(desc, by);
+                printAddMessage(tasks[taskCount - 1], taskCount);
+                continue;
+            }
+
+            if (input.startsWith("event ")) {
+                String rest = input.substring(6).trim();
+
+                String[] fromSplit = rest.split(" /from ", 2);
+                String desc = fromSplit[0].trim();
+
+                String from = "";
+                String to = "";
+
+                if (fromSplit.length == 2) {
+                    String[] toSplit = fromSplit[1].split(" /to ", 2);
+                    from = toSplit[0].trim();
+                    if (toSplit.length == 2) {
+                        to = toSplit[1].trim();
+                    }
+                }
+
+                tasks[taskCount++] = new Event(desc, from, to);
+                printAddMessage(tasks[taskCount - 1], taskCount);
+                continue;
+            }
+
+            tasks[taskCount++] = new Todo(input);
+            printAddMessage(tasks[taskCount - 1], taskCount);
+
         }
 
         sc.close();
