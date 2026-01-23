@@ -234,7 +234,27 @@ public class BenBot {
                     continue;
                 }
 
-                // Unknown command (matches your "blah" example)
+                if (input.startsWith("delete")) {
+                    int idx = parseIndex(input, "delete", taskCount); // 0-based index
+
+                    Task removed = tasks[idx];
+
+                    // shift left to fill the gap
+                    for (int i = idx; i < taskCount - 1; i++) {
+                        tasks[i] = tasks[i + 1];
+                    }
+                    tasks[taskCount - 1] = null;
+                    taskCount--;
+
+                    printLine();
+                    System.out.println(" Noted. I've removed this task:");
+                    System.out.println("   " + removed.displayString());
+                    System.out.println(" Now you have " + taskCount + " tasks in the list.");
+                    printLine();
+                    continue;
+                }
+
+                // Unknown command (use of AI)
                 throw new BenBotException("I don't understand that command. Try: todo / deadline /" +
                         " event / list / mark / unmark / bye");
 
@@ -243,7 +263,7 @@ public class BenBot {
                 System.out.println(" " + e.getMessage());
                 printLine();
             } catch (Exception e) {
-                // Safety net: prevents program crash (optional but nice)
+                // Safety net: prevents program crash (use of AI)
                 printLine();
                 System.out.println(" Something went wrong. Please try again.");
                 printLine();
