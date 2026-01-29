@@ -4,12 +4,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * The main entry point of the BenBot application.
+ * Coordinates user interaction, task management, and data storage.
+ */
 public class BenBot {
     private final Storage storage;
     private final TaskList tasks;
     private final Ui ui;
     private final Parser parser;
 
+    /**
+     * Creates a new BenBot instance using the given file path for storage.
+     *
+     * @param filePath Path to the file used for loading and saving tasks.
+     */
     public BenBot(String filePath) {
         ui = new Ui();
         parser = new Parser();
@@ -25,6 +34,10 @@ public class BenBot {
         tasks = loadedTasks;
     }
 
+    /**
+     * Runs the main command loop of the chatbot.
+     * Continuously reads user input and executes commands until exit.
+     */
     public void run() {
         ui.showGreeting();
 

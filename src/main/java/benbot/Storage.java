@@ -4,6 +4,9 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/**
+ * Handles loading tasks from and saving tasks to the local file system.
+ */
 public class Storage {
     private final String filePath;
 
@@ -11,6 +14,12 @@ public class Storage {
         this.filePath = filePath;
     }
 
+    /**
+     * Loads tasks from the storage file.
+     *
+     * @return A list of tasks loaded from disk.
+     * @throws IOException If an error occurs while reading the file.
+     */
     public ArrayList<Task> load() throws IOException {
         ensureFileExists();
 

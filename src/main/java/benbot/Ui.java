@@ -12,7 +12,7 @@ public class Ui {
 
     public void showGreeting() {
         showLine();
-        System.out.println(" What's good! I'm benbot.BenBot!");
+        System.out.println(" What's good! I'm BenBot!");
         System.out.println(" What can I do for you?");
         showLine();
         System.out.println();
