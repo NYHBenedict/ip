@@ -1,5 +1,6 @@
 package benbot;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Ui {
@@ -70,6 +71,15 @@ public class Ui {
         System.out.println(" Noted. I've removed this task:");
         System.out.println("   " + task.displayString());
         System.out.println(" Now you have " + count + " tasks in the list.");
+        showLine();
+    }
+
+    public void showFindResults(List<Task> matches) {
+        showLine();
+        System.out.println(" Here are the matching tasks in your list:");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + matches.get(i).displayString());
+        }
         showLine();
     }
 

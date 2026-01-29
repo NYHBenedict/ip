@@ -133,7 +133,15 @@ public class BenBot {
                         break;
                     }
 
-                    // todo/deadline/event: you’ll keep your existing parsing logic here
+                    case "find": {
+                        if (cmd.rest.isEmpty()) {
+                            throw new BenBotException("Find needs a keyword. Example: find book");
+                        }
+                        var matches = tasks.find(cmd.rest);
+                        ui.showFindResults(matches);
+                        break;
+                    }
+                    
                     default:
                         throw new BenBotException("I don't understand that command.");
                 }
