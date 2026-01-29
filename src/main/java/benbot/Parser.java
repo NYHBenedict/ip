@@ -1,3 +1,5 @@
+package benbot;
+
 public class Parser {
     public Command parse(String input) {
         String trimmed = input.trim();

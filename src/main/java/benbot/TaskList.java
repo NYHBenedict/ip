@@ -1,3 +1,5 @@
+package benbot;
+
 public class TaskList {
     private final Task[] tasks = new Task[100];
     private int size = 0;
@@ -38,5 +40,5 @@ public class TaskList {
         return tasks[index];
     }
 
-    public Task[] rawArray() { return tasks; }   // for Storage.save
+    public Task[] rawArray() { return tasks; }   // for benbot.Storage.save
 }

@@ -1,3 +1,5 @@
+package benbot;
+
 public class Command {
     public final String keyword;
     public final String rest;

@@ -1,3 +1,5 @@
+package benbot;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -36,7 +38,7 @@ public class BenBot {
                 switch (cmd.keyword) {
                     case "todo": {
                         if (cmd.rest.isEmpty()) {
-                            throw new BenBotException("Todo description cannot be empty. Try: todo read book");
+                            throw new BenBotException("benbot.Todo description cannot be empty. Try: todo read book");
                         }
                         Task t = tasks.add(new Todo(cmd.rest));
                         storage.save(tasks.rawArray(), tasks.size());
@@ -48,7 +50,7 @@ public class BenBot {
                         // expects: deadline <desc> /by yyyy-mm-dd
                         String[] parts = cmd.rest.split(" /by ", 2);
                         if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-                            throw new BenBotException("Deadline format: deadline <desc> /by yyyy-mm-dd");
+                            throw new BenBotException("benbot.Deadline format: deadline <desc> /by yyyy-mm-dd");
                         }
 
                         LocalDate byDate;
@@ -68,13 +70,13 @@ public class BenBot {
                         // expects: event <desc> /from <from> /to <to>
                         String[] fromSplit = cmd.rest.split(" /from ", 2);
                         if (fromSplit.length < 2 || fromSplit[0].trim().isEmpty() || fromSplit[1].trim().isEmpty()) {
-                            throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
+                            throw new BenBotException("benbot.Event format: event <desc> /from <from> /to <to>");
                         }
                         String desc = fromSplit[0].trim();
 
                         String[] toSplit = fromSplit[1].split(" /to ", 2);
                         if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
-                            throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
+                            throw new BenBotException("benbot.Event format: event <desc> /from <from> /to <to>");
                         }
                         String from = toSplit[0].trim();
                         String to = toSplit[1].trim();
@@ -135,9 +137,9 @@ public class BenBot {
         if (s.isEmpty()) throw new BenBotException("Please provide a task number.");
         int n;
         try { n = Integer.parseInt(s.trim()); }
-        catch (NumberFormatException e) { throw new BenBotException("Task number must be a number."); }
+        catch (NumberFormatException e) { throw new BenBotException("benbot.Task number must be a number."); }
         int idx = n - 1;
-        if (idx < 0 || idx >= tasks.size()) throw new BenBotException("Task number out of range.");
+        if (idx < 0 || idx >= tasks.size()) throw new BenBotException("benbot.Task number out of range.");
         return idx;
     }
 

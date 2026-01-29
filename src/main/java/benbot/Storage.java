@@ -1,3 +1,5 @@
+package benbot;
+
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ public class Storage {
             Event e = (Event) t;
             return "E | " + done + " | " + e.getDescription() + " | " + e.getFrom() + " | " + e.getTo();
         }
-        // default Todo
+        // default benbot.Todo
         return "T | " + done + " | " + t.getDescription();
     }
 
