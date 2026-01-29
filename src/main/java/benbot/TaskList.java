@@ -1,5 +1,8 @@
 package benbot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a list of tasks and provides operations to manage them.
  */
@@ -64,4 +67,15 @@ public class TaskList {
     public Task[] rawArray() {
         return tasks;
     }   // for benbot.Storage.save
+
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+        for (int i = 0; i < size(); i++) {
+            Task t = get(i);
+            if (t.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+                matches.add(t);
+            }
+        }
+        return matches;
+    }
 }
