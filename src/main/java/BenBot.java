@@ -1,4 +1,6 @@
 import java.util.Scanner;
+import java.io.*;
+import java.util.ArrayList;
 
 public class BenBot {
     private static final String LINE = "____________________________________________________________";
@@ -27,6 +29,10 @@ public class BenBot {
         protected String getTypeIcon() {
             return "T"; // base/unknown
         }
+
+        public String getDescription() { return description; }
+
+        public boolean isDone() { return isDone; }
 
         public String displayString() {
             return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;
@@ -57,6 +63,8 @@ public class BenBot {
             return "D";
         }
 
+        public String getBy() { return by; }
+
         @Override
         public String displayString() {
             return "[" + getTypeIcon() + "][" + getStatusIcon() + "] "
@@ -78,6 +86,10 @@ public class BenBot {
         protected String getTypeIcon() {
             return "E";
         }
+
+        public String getFrom() { return from; }
+
+        public String getTo() { return to; }
 
         @Override
         public String displayString() {
@@ -133,11 +145,108 @@ public class BenBot {
         System.out.println(LINE);
     }
 
+    public static class Storage {
+        private final String filePath;
+
+        public Storage(String filePath) {
+            this.filePath = filePath;
+        }
+
+        public ArrayList<Task> load() throws IOException {
+            ensureFileExists();
+
+            ArrayList<Task> loaded = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    line = line.trim();
+                    if (line.isEmpty()) continue;
+                    Task t = parseLine(line);
+                    if (t != null) loaded.add(t);
+                }
+            }
+            return loaded;
+        }
+
+        public void save(Task[] tasks, int taskCount) throws IOException {
+            ensureFileExists();
+
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+                for (int i = 0; i < taskCount; i++) {
+                    bw.write(encode(tasks[i]));
+                    bw.newLine();
+                }
+            }
+        }
+
+        private void ensureFileExists() throws IOException {
+            File f = new File(filePath);
+            File parent = f.getParentFile();
+            if (parent != null && !parent.exists()) parent.mkdirs();
+            if (!f.exists()) f.createNewFile();
+        }
+
+        private String encode(Task t) {
+            String done = t.isDone() ? "1" : "0";
+
+            if (t instanceof Deadline) {
+                Deadline d = (Deadline) t;
+                return "D | " + done + " | " + d.getDescription() + " | " + d.getBy();
+            }
+            if (t instanceof Event) {
+                Event e = (Event) t;
+                return "E | " + done + " | " + e.getDescription() + " | " + e.getFrom() + " | " + e.getTo();
+            }
+            // default Todo
+            return "T | " + done + " | " + t.getDescription();
+        }
+
+        private Task parseLine(String line) {
+            String[] parts = line.split(" \\| ");
+            if (parts.length < 3) return null;
+
+            String type = parts[0].trim();
+            boolean done = parts[1].trim().equals("1");
+            String desc = parts[2].trim();
+
+            Task t;
+            switch (type) {
+                case "T":
+                    t = new Todo(desc);
+                    break;
+                case "D":
+                    if (parts.length < 4) return null;
+                    t = new Deadline(desc, parts[3].trim());
+                    break;
+                case "E":
+                    if (parts.length < 5) return null;
+                    t = new Event(desc, parts[3].trim(), parts[4].trim());
+                    break;
+                default:
+                    return null;
+            }
+
+            if (done) t.markDone();
+            return t;
+        }
+    }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
         Task[] tasks = new Task[100];
         int taskCount = 0;
+
+        Storage storage = new Storage("./data/benbot.txt");
+
+        try {
+            var loaded = storage.load();
+            for (Task t : loaded) {
+                tasks[taskCount++] = t;
+            }
+        } catch (Exception ignored) {
+
+        }
 
         printGreeting();
 
@@ -165,6 +274,7 @@ public class BenBot {
                 if (input.startsWith("mark")) {
                     int idx = parseIndex(input, "mark", taskCount);
                     tasks[idx].markDone();
+                    storage.save(tasks, taskCount);
                     printLine();
                     System.out.println(" Nice! I've marked this task as done:");
                     System.out.println(" " + tasks[idx].displayString());
@@ -175,6 +285,7 @@ public class BenBot {
                 if (input.startsWith("unmark")) {
                     int idx = parseIndex(input, "unmark", taskCount);
                     tasks[idx].markNotDone();
+                    storage.save(tasks, taskCount);
                     printLine();
                     System.out.println(" OK, I've marked this task as not done yet:");
                     System.out.println(" " + tasks[idx].displayString());
@@ -188,6 +299,7 @@ public class BenBot {
                         throw new BenBotException("Todo description cannot be empty. Try: todo read book");
                     }
                     tasks[taskCount++] = new Todo(desc);
+                    storage.save(tasks, taskCount);
                     printAddMessage(tasks[taskCount - 1], taskCount);
                     continue;
                 }
@@ -204,6 +316,7 @@ public class BenBot {
                                 " /by Sunday");
                     }
                     tasks[taskCount++] = new Deadline(parts[0].trim(), parts[1].trim());
+                    storage.save(tasks, taskCount);
                     printAddMessage(tasks[taskCount - 1], taskCount);
                     continue;
                 }
@@ -230,6 +343,7 @@ public class BenBot {
                     String to = toSplit[1].trim();
 
                     tasks[taskCount++] = new Event(desc, from, to);
+                    storage.save(tasks, taskCount);
                     printAddMessage(tasks[taskCount - 1], taskCount);
                     continue;
                 }
@@ -245,6 +359,7 @@ public class BenBot {
                     }
                     tasks[taskCount - 1] = null;
                     taskCount--;
+                    storage.save(tasks, taskCount);
 
                     printLine();
                     System.out.println(" Noted. I've removed this task:");
