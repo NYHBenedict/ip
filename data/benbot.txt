@@ -1,4 +1,4 @@
-T | 1 | read book
-D | 0 | return book | June 6th
-E | 0 | project meeting | Aug 6th 2pm | 4pm
-T | 0 | learn piano
+D | 1 | return book | 2019-10-15
+D | 0 | learn piano | 2026-06-05
+T | 0 | return book
+E | 0 | birthday | 4pm | 8pm
