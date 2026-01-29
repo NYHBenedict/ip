@@ -57,13 +57,11 @@ public class Storage {
     private String encode(Task t) {
         String done = t.isDone() ? "1" : "0";
 
-        if (t instanceof Deadline) {
-            Deadline d = (Deadline) t;
-            return "D | " + done + " | " + d.getDescription() + " | " + d.getBy();
+        if (t instanceof Deadline dead) {
+            return "D | " + done + " | " + dead.getDescription() + " | " + dead.getBy();
         }
-        if (t instanceof Event) {
-            Event e = (Event) t;
-            return "E | " + done + " | " + e.getDescription() + " | " + e.getFrom() + " | " + e.getTo();
+        if (t instanceof Event event) {
+            return "E | " + done + " | " + event.getDescription() + " | " + event.getFrom() + " | " + event.getTo();
         }
         // default benbot.Todo
         return "T | " + done + " | " + t.getDescription();

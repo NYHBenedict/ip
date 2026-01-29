@@ -149,8 +149,11 @@ public class BenBot {
     private int parseIndex(String s) throws BenBotException {
         if (s.isEmpty()) throw new BenBotException("Please provide a task number.");
         int n;
-        try { n = Integer.parseInt(s.trim()); }
-        catch (NumberFormatException e) { throw new BenBotException("benbot.Task number must be a number."); }
+        try {
+            n = Integer.parseInt(s.trim());
+        } catch (NumberFormatException e) {
+            throw new BenBotException("benbot.Task number must be a number.");
+        }
         int idx = n - 1;
         if (idx < 0 || idx >= tasks.size()) throw new BenBotException("benbot.Task number out of range.");
         return idx;

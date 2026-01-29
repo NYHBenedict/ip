@@ -25,9 +25,13 @@ public class Task {
         return "T"; // base/unknown
     }
 
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public boolean isDone() { return isDone; }
+    public boolean isDone() {
+        return isDone;
+    }
 
     public String displayString() {
         return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;

@@ -5,8 +5,4 @@ public class Todo extends Task {
         super(description);
     }
 
-    @Override
-    protected String getTypeIcon() {
-        return "T";
-    }
 }

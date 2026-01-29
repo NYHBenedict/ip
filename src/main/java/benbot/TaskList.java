@@ -7,7 +7,8 @@ public class TaskList {
     private final Task[] tasks = new Task[100];
     private int size = 0;
 
-    public TaskList() {}
+    public TaskList() {
+    }
 
     public TaskList(java.util.List<Task> loaded) {
         for (Task t : loaded) {
@@ -15,8 +16,13 @@ public class TaskList {
         }
     }
 
-    public int size() { return size; }
-    public Task get(int index) { return tasks[index]; }
+    public int size() {
+        return size;
+    }
+
+    public Task get(int index) {
+        return tasks[index];
+    }
 
     /**
      * Adds a task to the task list.
@@ -55,5 +61,7 @@ public class TaskList {
         return tasks[index];
     }
 
-    public Task[] rawArray() { return tasks; }   // for benbot.Storage.save
+    public Task[] rawArray() {
+        return tasks;
+    }   // for benbot.Storage.save
 }
