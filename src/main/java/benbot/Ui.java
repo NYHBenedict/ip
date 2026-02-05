@@ -3,7 +3,7 @@ package benbot;
 import java.util.List;
 import java.util.Scanner;
 
-public class Ui {
+public class Ui implements UiOutput {
     private static final String LINE = "____________________________________________________________";
     private final Scanner sc = new Scanner(System.in);
 
@@ -85,5 +85,14 @@ public class Ui {
 
     public void showLoadingError() {
         showError("I couldn't load your saved tasks, starting with an empty list.");
+    }
+
+    @Override
+    public void showHelp(String message) {
+        showLine();
+        for (String line : message.split("\n")) {
+            System.out.println(" " + line);
+        }
+        showLine();
     }
 }

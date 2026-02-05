@@ -1,6 +1,11 @@
 package benbot;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -63,7 +68,7 @@ public class Storage {
         if (t instanceof Event event) {
             return "E | " + done + " | " + event.getDescription() + " | " + event.getFrom() + " | " + event.getTo();
         }
-        // default benbot.Todo
+        // default Todo
         return "T | " + done + " | " + t.getDescription();
     }
 
@@ -77,19 +82,19 @@ public class Storage {
 
         Task t;
         switch (type) {
-            case "T":
-                t = new Todo(desc);
-                break;
-            case "D":
-                LocalDate by = LocalDate.parse(parts[3].trim());
-                t = new Deadline(desc, by);
-                break;
-            case "E":
-                if (parts.length < 5) return null;
-                t = new Event(desc, parts[3].trim(), parts[4].trim());
-                break;
-            default:
-                return null;
+        case "T":
+            t = new Todo(desc);
+            break;
+        case "D":
+            LocalDate by = LocalDate.parse(parts[3].trim());
+            t = new Deadline(desc, by);
+            break;
+        case "E":
+            if (parts.length < 5) return null;
+            t = new Event(desc, parts[3].trim(), parts[4].trim());
+            break;
+        default:
+            return null;
         }
 
         if (done) t.markDone();
