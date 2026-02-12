@@ -1,5 +1,6 @@
 package benbot;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -130,102 +131,39 @@ public class BenBot {
     private boolean processCommand(String input) {
         try {
             Command cmd = parser.parse(input);
+            assert cmd != null : "Parser should always return a non-null Command";
 
             switch (cmd.keyword) {
-            case "todo": {
-                if (cmd.rest.isEmpty()) {
-                    throw new BenBotException("Todo description cannot be empty. Try: todo read book");
-                }
-                Task t = tasks.add(new Todo(cmd.rest));
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showAdded(t, tasks.size());
+            case "todo":
+                handleTodo(cmd);
                 break;
-            }
-
-            case "deadline": {
-                String[] parts = cmd.rest.split(" /by ", 2);
-                if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-                    throw new BenBotException("Deadline format: deadline <desc> /by yyyy-mm-dd");
-                }
-
-                LocalDate byDate;
-                try {
-                    byDate = LocalDate.parse(parts[1].trim(), DateTimeFormatter.ISO_LOCAL_DATE);
-                } catch (DateTimeParseException e) {
-                    throw new BenBotException("Date must be yyyy-mm-dd. Example: 2019-10-15");
-                }
-
-                Task t = tasks.add(new Deadline(parts[0].trim(), byDate));
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showAdded(t, tasks.size());
+            case "deadline":
+                handleDeadline(cmd);
                 break;
-            }
-
-            case "event": {
-                String[] fromSplit = cmd.rest.split(" /from ", 2);
-                if (fromSplit.length < 2 || fromSplit[0].trim().isEmpty() || fromSplit[1].trim().isEmpty()) {
-                    throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
-                }
-                String desc = fromSplit[0].trim();
-
-                String[] toSplit = fromSplit[1].split(" /to ", 2);
-                if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
-                    throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
-                }
-                String from = toSplit[0].trim();
-                String to = toSplit[1].trim();
-
-                Task t = tasks.add(new Event(desc, from, to));
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showAdded(t, tasks.size());
+            case "event":
+                handleEvent(cmd);
                 break;
-            }
-
             case "bye":
                 ui.showGoodbye();
                 return true;
-
             case "list":
                 ui.showTasks(tasks);
                 break;
-
-            case "mark": {
-                int idx = parseIndex(cmd.rest);
-                Task t = tasks.mark(idx);
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showMarked(t);
+            case "mark":
+                handleMark(cmd);
                 break;
-            }
-
-            case "unmark": {
-                int idx = parseIndex(cmd.rest);
-                Task t = tasks.unmark(idx);
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showUnmarked(t);
+            case "unmark":
+                handleUnmark(cmd);
                 break;
-            }
-
-            case "delete": {
-                int idx = parseIndex(cmd.rest);
-                Task removed = tasks.delete(idx);
-                storage.save(tasks.rawArray(), tasks.size());
-                ui.showDeleted(removed, tasks.size());
+            case "delete":
+                handleDelete(cmd);
                 break;
-            }
-
-            case "find": {
-                if (cmd.rest.isEmpty()) {
-                    throw new BenBotException("Find needs a keyword. Example: find book");
-                }
-                var matches = tasks.find(cmd.rest);
-                ui.showFindResults(matches);
+            case "find":
+                handleFind(cmd);
                 break;
-            }
-
             case "help":
                 ui.showHelp(HELP_TEXT);
                 break;
-
             default:
                 throw new BenBotException("I don't understand that command.");
             }
@@ -235,6 +173,78 @@ public class BenBot {
             ui.showError("Something went wrong. Please try again.");
         }
         return false;
+    }
+
+    /** Adds a task, persists to storage, and shows the added message. */
+    private void addTaskAndRespond(Task t) throws IOException {
+        tasks.add(t);
+        storage.save(tasks.rawArray(), tasks.size());
+        ui.showAdded(t, tasks.size());
+    }
+
+    private void handleTodo(Command cmd) throws BenBotException, IOException {
+        if (cmd.rest.isEmpty()) {
+            throw new BenBotException("Todo description cannot be empty. Try: todo read book");
+        }
+        addTaskAndRespond(new Todo(cmd.rest));
+    }
+
+    private void handleDeadline(Command cmd) throws BenBotException, IOException {
+        String[] parts = cmd.rest.split(" /by ", 2);
+        if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
+            throw new BenBotException("Deadline format: deadline <desc> /by yyyy-mm-dd");
+        }
+        LocalDate byDate;
+        try {
+            byDate = LocalDate.parse(parts[1].trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            throw new BenBotException("Date must be yyyy-mm-dd. Example: 2019-10-15");
+        }
+        addTaskAndRespond(new Deadline(parts[0].trim(), byDate));
+    }
+
+    private void handleEvent(Command cmd) throws BenBotException, IOException {
+        String[] fromSplit = cmd.rest.split(" /from ", 2);
+        if (fromSplit.length < 2 || fromSplit[0].trim().isEmpty() || fromSplit[1].trim().isEmpty()) {
+            throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
+        }
+        String desc = fromSplit[0].trim();
+        String[] toSplit = fromSplit[1].split(" /to ", 2);
+        if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
+            throw new BenBotException("Event format: event <desc> /from <from> /to <to>");
+        }
+        String from = toSplit[0].trim();
+        String to = toSplit[1].trim();
+        addTaskAndRespond(new Event(desc, from, to));
+    }
+
+    private void handleMark(Command cmd) throws BenBotException, IOException {
+        int idx = parseIndex(cmd.rest);
+        Task t = tasks.mark(idx);
+        storage.save(tasks.rawArray(), tasks.size());
+        ui.showMarked(t);
+    }
+
+    private void handleUnmark(Command cmd) throws BenBotException, IOException {
+        int idx = parseIndex(cmd.rest);
+        Task t = tasks.unmark(idx);
+        storage.save(tasks.rawArray(), tasks.size());
+        ui.showUnmarked(t);
+    }
+
+    private void handleDelete(Command cmd) throws BenBotException, IOException {
+        int idx = parseIndex(cmd.rest);
+        Task removed = tasks.delete(idx);
+        storage.save(tasks.rawArray(), tasks.size());
+        ui.showDeleted(removed, tasks.size());
+    }
+
+    private void handleFind(Command cmd) throws BenBotException {
+        if (cmd.rest.isEmpty()) {
+            throw new BenBotException("Find needs a keyword. Example: find book");
+        }
+        var matches = tasks.find(cmd.rest);
+        ui.showFindResults(matches);
     }
 
     private int parseIndex(String s) throws BenBotException {
@@ -247,6 +257,7 @@ public class BenBot {
         }
         int idx = n - 1;
         if (idx < 0 || idx >= tasks.size()) throw new BenBotException("Task number out of range.");
+        assert idx >= 0 && idx < tasks.size() : "Index must be in valid range after parseIndex";
         return idx;
     }
 

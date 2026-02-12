@@ -7,7 +7,10 @@ import java.util.List;
  * Represents a list of tasks and provides operations to manage them.
  */
 public class TaskList {
-    private final Task[] tasks = new Task[100];
+    /** Maximum number of tasks the list can hold. */
+    private static final int MAX_CAPACITY = 100;
+
+    private final Task[] tasks = new Task[MAX_CAPACITY];
     private int size = 0;
 
     public TaskList() {
@@ -24,6 +27,7 @@ public class TaskList {
     }
 
     public Task get(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         return tasks[index];
     }
 
@@ -34,6 +38,8 @@ public class TaskList {
      * @return The added task.
      */
     public Task add(Task t) {
+        assert t != null : "Task to add must not be null";
+        assert size < tasks.length : "Task list capacity must not be exceeded";
         tasks[size++] = t;
         return t;
     }
@@ -45,6 +51,7 @@ public class TaskList {
      * @return The removed task.
      */
     public Task delete(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         Task removed = tasks[index];
         for (int i = index; i < size - 1; i++) {
             tasks[i] = tasks[i + 1];
@@ -55,18 +62,26 @@ public class TaskList {
     }
 
     public Task mark(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         tasks[index].markDone();
         return tasks[index];
     }
 
     public Task unmark(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         tasks[index].markNotDone();
         return tasks[index];
     }
 
+    /**
+     * Returns the backing array of tasks for storage serialization.
+     * Callers must only access indices in range [0, size()).
+     *
+     * @return The internal task array.
+     */
     public Task[] rawArray() {
         return tasks;
-    }   // for benbot.Storage.save
+    }
 
     public List<Task> find(String keyword) {
         List<Task> matches = new ArrayList<>();
