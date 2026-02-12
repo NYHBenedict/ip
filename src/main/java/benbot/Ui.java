@@ -1,5 +1,7 @@
 package benbot;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -92,6 +94,23 @@ public class Ui implements UiOutput {
         showLine();
         for (String line : message.split("\n")) {
             System.out.println(" " + line);
+        }
+        showLine();
+    }
+
+    @Override
+    public void showFreeTimes(List<LocalDate> freeDays, int hoursRequested) {
+        showLine();
+        if (freeDays.isEmpty()) {
+            System.out.println(" No free days found in the next 60 days (each day has a deadline).");
+        } else if (hoursRequested > 0 && freeDays.size() == 1) {
+            String dateStr = freeDays.get(0).format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
+            System.out.println(" Nearest day with a " + hoursRequested + "-hour free slot: " + dateStr);
+        } else {
+            System.out.println(" Here are the next free days (no deadlines on these days):");
+            for (int i = 0; i < freeDays.size(); i++) {
+                System.out.println(" " + (i + 1) + ". " + freeDays.get(i).format(DateTimeFormatter.ofPattern("MMM dd yyyy")));
+            }
         }
         showLine();
     }

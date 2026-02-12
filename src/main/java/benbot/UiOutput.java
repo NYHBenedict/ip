@@ -1,5 +1,6 @@
 package benbot;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -19,4 +20,5 @@ public interface UiOutput {
     void showFindResults(List<Task> matches);
     void showLoadingError();
     void showHelp(String message);
+    void showFreeTimes(List<LocalDate> freeDays, int hoursRequested);
 }

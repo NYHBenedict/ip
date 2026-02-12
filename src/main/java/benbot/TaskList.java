@@ -1,7 +1,10 @@
 package benbot;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a list of tasks and provides operations to manage them.
@@ -77,5 +80,22 @@ public class TaskList {
             }
         }
         return matches;
+    }
+
+    /**
+     * Returns the set of dates that have at least one deadline.
+     * Used to find "free" days (days with no deadline).
+     *
+     * @return Set of deadline dates.
+     */
+    public Set<LocalDate> getDeadlineDates() {
+        Set<LocalDate> dates = new HashSet<>();
+        for (int i = 0; i < size; i++) {
+            Task t = tasks[i];
+            if (t instanceof Deadline) {
+                dates.add(((Deadline) t).getBy());
+            }
+        }
+        return dates;
     }
 }

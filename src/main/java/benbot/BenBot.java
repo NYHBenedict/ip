@@ -3,6 +3,9 @@ package benbot;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The main entry point of the BenBot application.
@@ -45,6 +48,11 @@ public class BenBot {
             + "  find <keyword>\n"
             + "    Find tasks whose description contains the keyword.\n"
             + "    Usage: find book\n"
+            + "\n"
+            + "  freetime [hours]\n"
+            + "    Find the nearest day with a free slot of the given hours (no deadlines that day).\n"
+            + "    Usage: freetime   (nearest day with a 4-hour free slot)\n"
+            + "           freetime 6 (nearest day with a 6-hour free slot)\n"
             + "\n"
             + "  bye\n"
             + "    Exit BenBot.\n"
@@ -222,6 +230,23 @@ public class BenBot {
                 break;
             }
 
+            case "freetime": {
+                int hoursRequested = 4;
+                if (!cmd.rest.isEmpty()) {
+                    try {
+                        hoursRequested = Integer.parseInt(cmd.rest.trim());
+                        if (hoursRequested < 1 || hoursRequested > 24) {
+                            throw new BenBotException("Please enter hours between 1 and 24. Example: freetime 4");
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new BenBotException("freetime expects an optional number (hours). Example: freetime 4");
+                    }
+                }
+                List<LocalDate> freeDays = findNextFreeDays(1);
+                ui.showFreeTimes(freeDays, hoursRequested);
+                break;
+            }
+
             case "help":
                 ui.showHelp(HELP_TEXT);
                 break;
@@ -235,6 +260,28 @@ public class BenBot {
             ui.showError("Something went wrong. Please try again.");
         }
         return false;
+    }
+
+    /** Maximum number of days ahead to scan for free days. */
+    private static final int MAX_DAYS_TO_SCAN = 60;
+
+    /**
+     * Finds the next N days (from today) that have no deadline.
+     *
+     * @param count Number of free days to return.
+     * @return List of free dates, in order (may be fewer than count if not enough in range).
+     */
+    private List<LocalDate> findNextFreeDays(int count) {
+        Set<LocalDate> deadlineDates = tasks.getDeadlineDates();
+        List<LocalDate> freeDays = new ArrayList<>();
+        LocalDate day = LocalDate.now();
+        for (int scanned = 0; scanned < MAX_DAYS_TO_SCAN && freeDays.size() < count; scanned++) {
+            if (!deadlineDates.contains(day)) {
+                freeDays.add(day);
+            }
+            day = day.plusDays(1);
+        }
+        return freeDays;
     }
 
     private int parseIndex(String s) throws BenBotException {
