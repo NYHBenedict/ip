@@ -48,10 +48,17 @@ application {
 shadowJar {
     archiveBaseName = "duke"
     archiveClassifier = null
+    archiveFileName = "duke.jar"
+    mergeServiceFiles()
+
+    manifest {
+        attributes "Main-Class": "benbot.Launcher"
+    }
 }
 
-run{
+run {
     standardInput = System.in
+    enableAssertions = true
 }
 
 jar {

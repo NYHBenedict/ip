@@ -24,6 +24,7 @@ public class TaskList {
     }
 
     public Task get(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         return tasks[index];
     }
 
@@ -34,6 +35,8 @@ public class TaskList {
      * @return The added task.
      */
     public Task add(Task t) {
+        assert t != null : "Task to add must not be null";
+        assert size < tasks.length : "Task list capacity (100) must not be exceeded";
         tasks[size++] = t;
         return t;
     }
@@ -45,6 +48,7 @@ public class TaskList {
      * @return The removed task.
      */
     public Task delete(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         Task removed = tasks[index];
         for (int i = index; i < size - 1; i++) {
             tasks[i] = tasks[i + 1];
@@ -55,11 +59,13 @@ public class TaskList {
     }
 
     public Task mark(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         tasks[index].markDone();
         return tasks[index];
     }
 
     public Task unmark(int index) {
+        assert index >= 0 && index < size : "Index must be in range [0, size)";
         tasks[index].markNotDone();
         return tasks[index];
     }

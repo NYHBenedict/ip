@@ -130,6 +130,7 @@ public class BenBot {
     private boolean processCommand(String input) {
         try {
             Command cmd = parser.parse(input);
+            assert cmd != null : "Parser should always return a non-null Command";
 
             switch (cmd.keyword) {
             case "todo": {
@@ -247,6 +248,7 @@ public class BenBot {
         }
         int idx = n - 1;
         if (idx < 0 || idx >= tasks.size()) throw new BenBotException("Task number out of range.");
+        assert idx >= 0 && idx < tasks.size() : "Index must be in valid range after parseIndex";
         return idx;
     }
 

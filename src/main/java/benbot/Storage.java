@@ -42,10 +42,13 @@ public class Storage {
     }
 
     public void save(Task[] tasks, int taskCount) throws IOException {
+        assert tasks != null : "Task array must not be null";
+        assert taskCount >= 0 && taskCount <= tasks.length : "taskCount must be in range [0, tasks.length]";
         ensureFileExists();
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
             for (int i = 0; i < taskCount; i++) {
+                assert tasks[i] != null : "Task at index " + i + " must not be null";
                 bw.write(encode(tasks[i]));
                 bw.newLine();
             }
@@ -60,6 +63,7 @@ public class Storage {
     }
 
     private String encode(Task t) {
+        assert t != null : "Task to encode must not be null";
         String done = t.isDone() ? "1" : "0";
 
         if (t instanceof Deadline dead) {
@@ -86,6 +90,7 @@ public class Storage {
             t = new Todo(desc);
             break;
         case "D":
+            assert parts.length >= 4 : "Deadline line must have at least 4 pipe-separated parts";
             LocalDate by = LocalDate.parse(parts[3].trim());
             t = new Deadline(desc, by);
             break;

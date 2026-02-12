@@ -49,6 +49,7 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        assert benbot != null : "BenBot must be injected via setBenBot() before handling input";
         String input = userInput.getText().trim();
         if (input.isEmpty()) {
             return;
