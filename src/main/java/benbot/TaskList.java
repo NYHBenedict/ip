@@ -7,7 +7,10 @@ import java.util.List;
  * Represents a list of tasks and provides operations to manage them.
  */
 public class TaskList {
-    private final Task[] tasks = new Task[100];
+    /** Maximum number of tasks the list can hold. */
+    private static final int MAX_CAPACITY = 100;
+
+    private final Task[] tasks = new Task[MAX_CAPACITY];
     private int size = 0;
 
     public TaskList() {
@@ -36,7 +39,7 @@ public class TaskList {
      */
     public Task add(Task t) {
         assert t != null : "Task to add must not be null";
-        assert size < tasks.length : "Task list capacity (100) must not be exceeded";
+        assert size < tasks.length : "Task list capacity must not be exceeded";
         tasks[size++] = t;
         return t;
     }
@@ -70,9 +73,15 @@ public class TaskList {
         return tasks[index];
     }
 
+    /**
+     * Returns the backing array of tasks for storage serialization.
+     * Callers must only access indices in range [0, size()).
+     *
+     * @return The internal task array.
+     */
     public Task[] rawArray() {
         return tasks;
-    }   // for benbot.Storage.save
+    }
 
     public List<Task> find(String keyword) {
         List<Task> matches = new ArrayList<>();
