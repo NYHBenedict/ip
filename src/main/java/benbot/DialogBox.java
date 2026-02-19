@@ -23,6 +23,20 @@ public class DialogBox extends HBox {
     @FXML
     private ImageView displayPicture;
 
+    private static final String USER_BUBBLE_STYLE =
+            "-fx-background-color: #DCF8C6;"
+            + "-fx-background-radius: 12 12 0 12;"
+            + "-fx-padding: 8 12;"
+            + "-fx-font-size: 13px;"
+            + "-fx-text-fill: black;";
+
+    private static final String BOT_BUBBLE_STYLE =
+            "-fx-background-color: #FFFFFF;"
+            + "-fx-background-radius: 12 12 12 0;"
+            + "-fx-padding: 8 12;"
+            + "-fx-font-size: 13px;"
+            + "-fx-text-fill: black;";
+
     private DialogBox(String text, Image img) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(MainWindow.class.getResource("/view/DialogBox.fxml"));
@@ -37,6 +51,7 @@ public class DialogBox extends HBox {
         displayPicture.setImage(img);
         displayPicture.setVisible(false);
         displayPicture.setManaged(false);
+        setSpacing(0);
     }
 
     /**
@@ -50,11 +65,15 @@ public class DialogBox extends HBox {
     }
 
     public static DialogBox getUserDialog(String text, Image img) {
-        return new DialogBox(text, img);
+        DialogBox db = new DialogBox(text, img);
+        db.dialog.setStyle(USER_BUBBLE_STYLE);
+        db.setAlignment(Pos.TOP_RIGHT);
+        return db;
     }
 
     public static DialogBox getDukeDialog(String text, Image img) {
         DialogBox db = new DialogBox(text, img);
+        db.dialog.setStyle(BOT_BUBBLE_STYLE);
         db.flip();
         return db;
     }

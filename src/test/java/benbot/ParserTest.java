@@ -23,4 +23,22 @@ class ParserTest {
         assertEquals("todo", c.keyword);
         assertEquals("read book", c.rest);
     }
+
+    @Test
+    void parse_emptyInput_returnsEmptyKeywordAndRest() {
+        Parser p = new Parser();
+        Command c = p.parse("");
+
+        assertEquals("", c.keyword);
+        assertEquals("", c.rest);
+    }
+
+    @Test
+    void parse_singleWord_restIsEmpty() {
+        Parser p = new Parser();
+        Command c = p.parse("list");
+
+        assertEquals("list", c.keyword);
+        assertEquals("", c.rest);
+    }
 }

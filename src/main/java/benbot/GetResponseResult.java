@@ -12,10 +12,20 @@ public class GetResponseResult {
         this.shouldExit = shouldExit;
     }
 
+    /**
+     * Returns the response text to show in the GUI.
+     *
+     * @return The bot's reply message.
+     */
     public String getMessage() {
         return message;
     }
 
+    /**
+     * Returns whether the user said "bye" and the app should close.
+     *
+     * @return true if the user requested exit.
+     */
     public boolean shouldExit() {
         return shouldExit;
     }

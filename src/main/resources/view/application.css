@@ -1,0 +1,74 @@
+/* ---- Overall window ---- */
+.root {
+    -fx-background-color: #ECE5DD;
+    -fx-background-image: url("/images/background.png");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+/* ---- Chat scroll area ---- */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ---- Slim scroll bar ---- */
+.scroll-bar:vertical {
+    -fx-pref-width: 6px;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #b0b0b0;
+    -fx-background-radius: 3px;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+    -fx-background-color: transparent;
+}
+
+/* ---- Bottom input bar ---- */
+#inputBar {
+    -fx-background-color: #F0F0F0;
+    -fx-padding: 6 5 6 5;
+}
+
+/* ---- Text field ---- */
+#userInput {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-border-color: transparent;
+    -fx-padding: 7 14;
+    -fx-font-size: 13px;
+    -fx-prompt-text-fill: #999999;
+}
+
+#userInput:focused {
+    -fx-border-color: transparent;
+    -fx-effect: none;
+}
+
+/* ---- Send button ---- */
+#sendButton {
+    -fx-background-color: #075E54;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+#sendButton:hover {
+    -fx-background-color: #128C7E;
+}
