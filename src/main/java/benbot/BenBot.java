@@ -2,8 +2,10 @@ package benbot;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 /**
  * The main entry point of the BenBot application.
@@ -215,7 +217,38 @@ public class BenBot {
         }
         String from = toSplit[0].trim();
         String to = toSplit[1].trim();
+        validateEventTimes(from, to);
         addTaskAndRespond(new Event(desc, from, to));
+    }
+
+    /**
+     * If both from and to can be parsed as date or date-time, ensures end is not before start.
+     * Supports yyyy-MM-dd and yyyy-MM-dd HH:mm (and similar) formats. Free-form text (e.g. "Mon 2pm") is not validated.
+     */
+    private void validateEventTimes(String from, String to) throws BenBotException {
+        Optional<LocalDateTime> fromDt = parseEventDateTime(from);
+        Optional<LocalDateTime> toDt = parseEventDateTime(to);
+        if (fromDt.isPresent() && toDt.isPresent() && !toDt.get().isAfter(fromDt.get())) {
+            throw new BenBotException("Event end time must be after start time. (Use yyyy-mm-dd or yyyy-mm-dd HH:mm for both /from and /to to validate.)");
+        }
+    }
+
+    private static final DateTimeFormatter EVENT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter EVENT_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    private Optional<LocalDateTime> parseEventDateTime(String s) {
+        if (s == null || s.isEmpty()) return Optional.empty();
+        try {
+            return Optional.of(LocalDateTime.parse(s.trim(), EVENT_DATE_TIME));
+        } catch (DateTimeParseException e) {
+            // ignore
+        }
+        try {
+            return Optional.of(LocalDate.parse(s.trim(), EVENT_DATE).atStartOfDay());
+        } catch (DateTimeParseException e) {
+            // ignore
+        }
+        return Optional.empty();
     }
 
     private void handleMark(Command cmd) throws BenBotException, IOException {

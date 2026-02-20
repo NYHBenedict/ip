@@ -25,9 +25,9 @@ public class Main extends Application {
             stage.setScene(scene);
             fxmlLoader.<MainWindow>getController().setBenBot(benbot);
             stage.setTitle("BenBot");
-            stage.setResizable(false);
-            stage.setMinHeight(600.0);
-            stage.setMinWidth(400.0);
+            stage.setResizable(true);
+            stage.setMinWidth(350.0);
+            stage.setMinHeight(400.0);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

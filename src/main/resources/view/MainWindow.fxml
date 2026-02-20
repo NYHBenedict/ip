@@ -8,13 +8,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="mainLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="benbot.MainWindow">
+<AnchorPane fx:id="mainLayout" minHeight="400.0" minWidth="350.0" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="benbot.MainWindow">
     <children>
         <ScrollPane fx:id="scrollPane" hbarPolicy="NEVER" fitToWidth="true"
                     AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="52.0"
                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <content>
-                <VBox fx:id="dialogContainer" prefWidth="400.0" spacing="8.0">
+                <VBox fx:id="dialogContainer" maxWidth="Infinity" spacing="8.0">
                     <padding>
                         <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
                     </padding>

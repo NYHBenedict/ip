@@ -79,7 +79,7 @@ ____________________________________________________________
 
 ### Adding an event: `event`
 
-Adds an event with start and end times.
+Adds an event with start and end times. You can use free-form text (e.g. `Mon 2pm` / `3pm`) or structured dates: `yyyy-mm-dd` or `yyyy-mm-dd HH:mm`. When both times are given in a structured format, the end time must be **after** the start time (BenBot will reject end-before-start).
 
 **Usage:** `event <description> /from <from> /to <to>`
 
