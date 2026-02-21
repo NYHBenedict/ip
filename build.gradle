@@ -46,9 +46,10 @@ application {
 }
 
 shadowJar {
-    archiveBaseName = "duke"
+    archiveBaseName = "BenBot"
     archiveClassifier = null
     archiveFileName = "BenBot.jar"
+    destinationDirectory = file("release")
     mergeServiceFiles()
 
     manifest {

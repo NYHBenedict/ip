@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
@@ -222,31 +223,64 @@ public class BenBot {
     }
 
     /**
-     * If both from and to can be parsed as date or date-time, ensures end is not before start.
-     * Supports yyyy-MM-dd and yyyy-MM-dd HH:mm (and similar) formats. Free-form text (e.g. "Mon 2pm") is not validated.
+     * If both from and to can be parsed as date or date-time, ensures end is after start.
+     * Rejects when from is after to (or equal). Supports yyyy-MM-dd, yyyy-MM-dd HH:mm, dd-MM-yyyy, dd/MM/yyyy.
+     * Free-form text (e.g. "Mon 2pm") is not validated.
      */
     private void validateEventTimes(String from, String to) throws BenBotException {
         Optional<LocalDateTime> fromDt = parseEventDateTime(from);
         Optional<LocalDateTime> toDt = parseEventDateTime(to);
-        if (fromDt.isPresent() && toDt.isPresent() && !toDt.get().isAfter(fromDt.get())) {
-            throw new BenBotException("Event end time must be after start time. (Use yyyy-mm-dd or yyyy-mm-dd HH:mm for both /from and /to to validate.)");
+        if (fromDt.isPresent() && toDt.isPresent()) {
+            if (!toDt.get().isAfter(fromDt.get())) {
+                throw new BenBotException("Event end time must be after start time. (from: " + from + " to: " + to + ")");
+            }
         }
     }
 
     private static final DateTimeFormatter EVENT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter EVENT_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+    /** e.g. 2025-1-1 4 pm (space before am/pm), case-insensitive */
+    private static final DateTimeFormatter EVENT_DATE_TIME_12H_SPACE = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .appendPattern("yyyy-M-d h a")
+            .toFormatter();
+    /** e.g. 2025-1-1 4pm (no space before am/pm), case-insensitive */
+    private static final DateTimeFormatter EVENT_DATE_TIME_12H_NO_SPACE = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .appendPattern("yyyy-M-d ha")
+            .toFormatter();
+    private static final DateTimeFormatter EVENT_DATE_ISO = DateTimeFormatter.ISO_LOCAL_DATE;
+    /** e.g. 2025-1-1 (dashed, single-digit month/day ok) */
+    private static final DateTimeFormatter EVENT_DATE_ISO_FLEX = DateTimeFormatter.ofPattern("yyyy-M-d");
+    /** Space-separated: yyyy MM dd or yyyy M d (e.g. 2025 02 21 or 2025 2 1). */
+    private static final DateTimeFormatter EVENT_DATE_SPACES = DateTimeFormatter.ofPattern("yyyy M d");
+    private static final DateTimeFormatter EVENT_DATE_DMY_DASH = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter EVENT_DATE_DMY_SLASH = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private Optional<LocalDateTime> parseEventDateTime(String s) {
         if (s == null || s.isEmpty()) return Optional.empty();
+        String trimmed = s.trim();
         try {
-            return Optional.of(LocalDateTime.parse(s.trim(), EVENT_DATE_TIME));
+            return Optional.of(LocalDateTime.parse(trimmed, EVENT_DATE_TIME));
         } catch (DateTimeParseException e) {
             // ignore
         }
         try {
-            return Optional.of(LocalDate.parse(s.trim(), EVENT_DATE).atStartOfDay());
+            return Optional.of(LocalDateTime.parse(trimmed, EVENT_DATE_TIME_12H_SPACE));
         } catch (DateTimeParseException e) {
             // ignore
+        }
+        try {
+            return Optional.of(LocalDateTime.parse(trimmed, EVENT_DATE_TIME_12H_NO_SPACE));
+        } catch (DateTimeParseException e) {
+            // ignore
+        }
+        for (DateTimeFormatter dateFmt : new DateTimeFormatter[]{
+                EVENT_DATE_ISO, EVENT_DATE_ISO_FLEX, EVENT_DATE_SPACES, EVENT_DATE_DMY_DASH, EVENT_DATE_DMY_SLASH}) {
+            try {
+                return Optional.of(LocalDate.parse(trimmed, dateFmt).atStartOfDay());
+            } catch (DateTimeParseException e) {
+                // try next
+            }
         }
         return Optional.empty();
     }
